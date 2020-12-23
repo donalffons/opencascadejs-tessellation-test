@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import React, { useEffect, useRef, useState } from "react";
+import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 type StepModelProps = {
   stepFileUrl: string,
@@ -8,11 +8,17 @@ type StepModelProps = {
   angDeflection: number,
   isWireframe: boolean,
   downloadGlbFunctionRef: any,
+  loading: boolean,
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>,
 };
 
-export default function StepModel({stepFileUrl, oc, linDeflection, angDeflection, isWireframe, downloadGlbFunctionRef}: StepModelProps) {
+export default function StepModel({stepFileUrl, oc, linDeflection, angDeflection, isWireframe, downloadGlbFunctionRef, loading, setLoading}: StepModelProps) {
   const [stepFileContents, setStepFileContents] = useState<string>();
+  const setLoadingRef = useRef<React.Dispatch<React.SetStateAction<boolean>>>(setLoading);
+  useEffect(() => setLoadingRef.current = setLoading, [setLoading]);
+
   useEffect(() => {
+    setLoadingRef.current(true);
     (async () => {
       const stepFileContents = await (await fetch(stepFileUrl)).text();
       setStepFileContents(stepFileContents);
@@ -20,51 +26,35 @@ export default function StepModel({stepFileUrl, oc, linDeflection, angDeflection
   }, [stepFileUrl]);
 
   const [step1, setStep1] = useState<{
-    doc: any,
-    shape: any,
-  }>();
+    done: boolean,
+  }>({
+    done: false,
+  });
   useEffect(() => {
     if(!oc) return;
-    if(oc.FS.analyzePath('/file.stp').exists) {
-      oc.FS.unlink('/file.stp');
-    }
-    oc.FS.createDataFile("/", "file.stp", stepFileContents, true, true);
-    const reader = new oc.STEPCAFControl_Reader_1();
-    reader.ReadFile("./file.stp");
-    
-    const doc = new oc.Handle_TDocStd_Document_2(new oc.TDocStd_Document(new oc.TCollection_ExtendedString_1()));
-
-    if(!reader.Transfer_1(doc, new oc.Message_ProgressRange_1())) {
-      console.log("this didn't work");
-    }
-    console.log("seems like it worked");
-
-    const assembly = oc.XCAFDoc_DocumentTool.ShapeTool(doc.get().Main());
-    const freeShapes = new oc.TDF_LabelSequence_1();
-    assembly.get().GetFreeShapes(freeShapes);
-    const oneFreeShape = freeShapes.First();
-    const shape = oc.XCAFDoc_ShapeTool.GetShape_2(oneFreeShape);
-    setStep1({shape, doc});
+    setLoadingRef.current(true);
+    (async() => {
+      await oc.worker.step1(stepFileContents);
+      setStep1({
+        done: true,
+      });
+    })();
   }, [oc, stepFileContents]);
 
   const [step2, setStep2] = useState<any>();
   useEffect(() => {
-    if(!oc || !step1) return;
-    const writer = new oc.RWGltf_CafWriter(new oc.TCollection_AsciiString_2("./export.glb"), true);
-    oc.BRepTools.Clean(step1.shape);
-    new oc.BRepMesh_IncrementalMesh_2(step1.shape, linDeflection, false, angDeflection, false);
-    writer.Perform_2(step1.doc, new oc.TColStd_IndexedDataMapOfStringString_1(), new oc.Message_ProgressRange_1());
-
-    const aBuf = oc.FS.readFile("./export.glb", {
-      encoding: "binary",
-    });
-
-    setStep2(aBuf.buffer);
+    if(!oc || !step1.done) return;
+    setLoadingRef.current(true);
+    (async() => {
+      const buf = await oc.worker.step2(linDeflection, angDeflection);
+      setStep2(buf);
+    })();
   }, [oc, step1, linDeflection, angDeflection]);
 
   const [gltf, setGltf] = useState<GLTF>();
   useEffect(() => {
     if(!step2) return;
+    setLoadingRef.current(true);
     const loader = new GLTFLoader();
     loader.parse(step2, "", gltf => {
       setGltf(gltf);
@@ -73,7 +63,7 @@ export default function StepModel({stepFileUrl, oc, linDeflection, angDeflection
           (o as any).material.wireframe = isWireframe;
         }
       });
-      console.log("updated model");
+      setLoadingRef.current(false);
     });
   }, [step2, isWireframe]);
 
