@@ -16,6 +16,9 @@ module.exports = function override(config, env) {
       test: /\.(wasm)$/,
       type: "javascript/auto",
       loader: "file-loader",
+      options: {
+        name: '[name]-[contenthash].[ext]',
+      }
     },
     ...oneOfRule.oneOf,
   ];

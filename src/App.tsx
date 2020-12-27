@@ -28,7 +28,7 @@ function App() {
   const [angDeflection, setAngDeflection] = useState<number>(1);
   const [linDeflectionDisplayValue, setLinDeflectionDisplayValue] = useState<number>(1);
   const [angDeflectionDisplayValue, setAngDeflectionDisplayValue] = useState<number>(1);
-  const [isWireframe, setIsWireframe] = useState(false);
+  const [isWireframe, setIsWireframe] = useState(true);
   const [loading, setLoading] = useState(true);
 
   const downloadGlbFunctionRef = useRef<any>();
@@ -48,7 +48,11 @@ function App() {
     <div
       style={{
         width: "100vw",
-        height: "100vh"
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
       }}
     >
       {
@@ -83,6 +87,7 @@ function App() {
       </Canvas>
       <div
         style={{
+          width: "70%",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
@@ -107,6 +112,7 @@ function App() {
       </div>
       <div
         style={{
+          width: "70%",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
@@ -131,6 +137,7 @@ function App() {
       </div>
       <div
         style={{
+          width: "70%",
           display: "flex",
           flexDirection: "row",
           justifyContent: "space-evenly",
@@ -141,6 +148,9 @@ function App() {
           onClick={() => setIsWireframe(w => !w)}
           variant="contained"
           color="primary"
+          style={{
+            width: "25%",
+          }}
         >
           {
             isWireframe ? "Solid" : "Wireframe"
@@ -151,6 +161,9 @@ function App() {
           onClick={() => downloadGlbFunctionRef.current()}
           variant="contained"
           color="primary"
+          style={{
+            width: "25%",
+          }}
         >
           Download GLB
         </Button>
