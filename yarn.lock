@@ -7940,10 +7940,10 @@ open@^7.0.2:
     is-docker "^2.0.0"
     is-wsl "^2.1.1"
 
-opencascade.js@2.0.0-beta.57120e6:
-  version "2.0.0-beta.57120e6"
-  resolved "https://registry.yarnpkg.com/opencascade.js/-/opencascade.js-2.0.0-beta.57120e6.tgz#5dc190a8880be7b142631b0a3589f9ca2d172fdf"
-  integrity sha512-XUH35ZYiDdrRPiwK38g3CyU4J/rxQ82xXgRDePmRTWIALGdlJ3i7SFb/o74/bLhdKp39No1EIRO8fjvFeKwzQQ==
+opencascade.js@2.0.0-beta.af2d87e:
+  version "2.0.0-beta.af2d87e"
+  resolved "https://registry.yarnpkg.com/opencascade.js/-/opencascade.js-2.0.0-beta.af2d87e.tgz#b8d3666c2abf35c0a89aa60fc8c4f00ceda389f1"
+  integrity sha512-/Mi3GymUhIfQ8xc9rda6+xaJxTUCViKci+SSXhMAmWrUmvaSer4C1eqx7x+moIs+Ggb/1lD6Vsdnt2HVmQFixg==
 
 opn@^5.5.0:
   version "5.5.0"
